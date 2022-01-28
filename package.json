@@ -1,0 +1,39 @@
+{
+  "name": "cd-code-quiz-rest-api",
+  "version": "1.0.0",
+  "description": "> In an effort to grow as developers and learn in a production setting, we are building a fully-functional REST API for coding Quizzes using a TDD approach (test-driven development) and MVC (model-view-controller) pattern.\r > Live demo [_here_](https://www.example.com). <!-- If you have the project hosted somewhere, include the link here. -->",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon -r dotenv/config index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChrisDeCleene/cd-code-quiz-rest-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChrisDeCleene/cd-code-quiz-rest-api/issues"
+  },
+  "homepage": "https://github.com/ChrisDeCleene/cd-code-quiz-rest-api#readme",
+  "dependencies": {
+    "body-parser": "^1.19.1",
+    "cors": "^2.8.5",
+    "dotenv": "^8.6.0",
+    "errorhandler": "^1.5.1",
+    "express": "^4.17.2",
+    "express-session": "^1.17.2",
+    "http-errors": "^1.8.1",
+    "js-yaml": "^3.14.1",
+    "morgan": "^1.10.0",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "swagger-jsdoc": "^6.0.0-rc.3",
+    "swagger-ui-express": "^4.1.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
