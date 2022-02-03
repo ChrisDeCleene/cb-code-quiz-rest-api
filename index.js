@@ -1,19 +1,13 @@
-const express = require("express");
-const app = express();
+const mongoose = require("mongoose");
+const createServer = require("./server");
+const PORT = process.env.PORT || 5000;
 
-const loaders = require("./loaders");
+const { MONGO_URL } = require("./config");
 
-const PORT = process.env.PORT || 4000;
-
-async function startServer() {
-  // Init application loaders
-  loaders(app);
-
+mongoose.connect(MONGO_URL, { useNewUrlParser: true }).then(async () => {
+  const app = await createServer();
   // Start server
   app.listen(PORT, () => {
     console.log("Server listening on http://localhost:" + PORT);
   });
-}
-startServer();
-
-module.exports = app;
+});
