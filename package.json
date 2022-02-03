@@ -28,6 +28,7 @@
     "express-session": "^1.17.2",
     "http-errors": "^1.8.1",
     "js-yaml": "^3.14.1",
+    "mongoose": "^6.2.0",
     "morgan": "^1.10.0",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
