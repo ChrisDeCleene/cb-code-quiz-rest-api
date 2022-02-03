@@ -2,22 +2,26 @@ const mongoose = require("mongoose");
 const supertest = require("supertest");
 const createServer = require("../server");
 
-const TopicModel = require("../models/topic");
+const QuestionModel = require("../models/question");
 const UserModel = require("../models/user");
+const ScoreModel = require("../models/score");
 
-const { MONGO_URL } = require("../config");
+const { MONGO_TEST_URL } = require("../config");
+
+// Adjust if tests are timing out frequently
+// jest.setTimeout(30000);
 
 // Middleware for emptying out a collection of documents between tests
-async function removeAllCollections() {
+const removeAllCollections = async () => {
   const collections = Object.keys(mongoose.connection.collections);
   for (let collectionName of collections) {
     const collection = mongoose.connection.collections[collectionName];
     collection.deleteMany();
   }
-}
+};
 
 // Middleware for deleting collections after tests run
-async function dropAllCollections() {
+const dropAllCollections = async () => {
   const collections = Object.keys(mongoose.connection.collections);
   for (const collectionName of collections) {
     const collection = mongoose.connection.collections[collectionName];
@@ -36,11 +40,63 @@ async function dropAllCollections() {
       console.log(error.message);
     }
   }
-}
+};
 
+// Function for creating and accessing a user
+const createUser = () => {
+  const userObject = {
+    email: "test@test.com",
+    password: "!password",
+    firstName: "Testy",
+    lastName: "Test",
+    userType: "Student",
+    createdAt: new Date(),
+    modifiedAt: new Date(),
+  };
+  const user = new UserModel(userObject);
+  return {
+    user,
+    userObject,
+  };
+};
+
+// Function for creating and accessing a question
+const createQuestion = () => {
+  const questionObject = {
+    question: "Do you know the muffin man?",
+    answers: [
+      ["Who lives in Drury Lane?", 1],
+      ["Nope", 0],
+    ],
+    topics: ["General"],
+    type: "multiple-choice",
+  };
+  const question = new QuestionModel(questionObject);
+  return {
+    question,
+    questionObject,
+  };
+};
+
+const createScore = (userId, questionId) => {
+  const scoreObject = {
+    userId,
+    questionId,
+    isCorrect: false,
+  };
+
+  const score = new ScoreModel(scoreObject);
+
+  return {
+    score,
+    scoreObject,
+  };
+};
+
+// Set up mongodb connection before starting tests
 beforeAll((done) => {
   mongoose.connect(
-    MONGO_URL,
+    MONGO_TEST_URL,
     {
       useNewUrlParser: true,
     },
@@ -48,44 +104,51 @@ beforeAll((done) => {
   );
 });
 
+// deleteMany on each collection before moving to next test
 afterEach(async () => {
   await removeAllCollections();
 });
 
+// Drop entire testing collection before disconnecting from MongoDB
 afterAll(async () => {
   await dropAllCollections();
   await mongoose.connection.close();
 });
 
 describe("User Model", () => {
-  test("should create a user with email, password, firstName, lastName, createdAt and modifiedAt properties", () => {
-    const data = {
-      email: 'test@test.com',
-      password: '!password',
-      firstName: 'Testy',
-      lastName: 'Test',
-      createdAt: new Date(),
-      modifiedAt: new Date()
-    };
-    const user = new UserModel(data);
-    console.log(user)
-    expect(user.email).toEqual('email')
-    expect(user.password).toEqual('password')
-    expect(user.firstName).toEqual('password')
-    expect(user).toHaveProperty('createdAt')
-    expect(user).toHaveProperty('modifiedAt')
+  test("should create a user with email, password, firstName, lastName, userType, createdAt and modifiedAt properties", () => {
+    const { user, userObject } = createUser();
+    expect(user.email).toEqual(userObject.email);
+    expect(user.password).toEqual(userObject.password);
+    expect(user.firstName).toEqual(userObject.firstName);
+    expect(user.userType).toEqual(userObject.userType);
+    expect(user).toHaveProperty("createdAt");
+    expect(user).toHaveProperty("modifiedAt");
   });
 });
 
-describe("Topic Model", () => {
-  test("should create a topic with title and questions properties", () => {
-    const data = {
-      title: "Lorem Ipsum",
-      questions: [],
-    };
-    const topic = new TopicModel(data);
-    expect(topic._id).toBeTruthy()
-    expect(topic.title).toEqual(data.title);
-    expect(topic.questions).toEqual(data.questions);
+describe("Question Model", () => {
+  test("should create a question with question, answers, topics, and type", () => {
+    const { question, questionObject } = createQuestion();
+    expect(question._id).toBeTruthy();
+    expect(question.question).toEqual(questionObject.question);
+    expect(question.answers).toEqual(questionObject.answers);
+    expect(question.topics).toEqual(questionObject.topics);
+    expect(question.type).toEqual(questionObject.type);
+  });
+});
+
+describe("Score Model", () => {
+  test("should create a score using a user and question document", () => {
+    const { user } = createUser();
+    // user.save();
+    const { question } = createQuestion();
+    // question.save();
+    const { score, scoreObject } = createScore(user._id, question._id);
+
+    expect(score._id).toBeTruthy();
+    expect(score.userId).toEqual(user._id);
+    expect(score.questionId).toEqual(question._id);
+    expect(score.isCorrect).toEqual(scoreObject.isCorrect);
   });
 });
