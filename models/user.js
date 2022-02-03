@@ -15,6 +15,7 @@ const UserSchema = new Schema({
   },
   firstName: { type: String },
   lastName: { type: String },
+  userType: { type: String, required: true },
   createdAt: { type: Date },
   modifiedAt: { type: Date },
 });
