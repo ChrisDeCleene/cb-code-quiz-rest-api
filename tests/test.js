@@ -139,16 +139,18 @@ describe("GET /api/questions/:id", () => {
     const { question } = await createQuestion(
       "What is the average weight of an elephant?"
     );
-    console.log(question.id);
 
     const app = await createServer();
 
     await supertest(app)
       .get("/questions/" + question.id)
       .then((response) => {
+        console.log("RESPONSE", response.body, "QUESTION", question);
         expect(response.body._id).toBe(question.id);
         expect(response.body.question).toBe(question.question);
-        expect(response.body.answers[0]).toBe(question.answers[0]);
+        expect(response.body.answers[0][0]).toBe(question.answers[0][0]);
+        expect(response.body.answers[0][0] instanceof String).toBeTruthy;
+        expect(response.body.answers[0][1] instanceof Number).toBeTruthy;
         expect(response.body.topics[0]).toBe(question.topics[0]);
         expect(response.body.type).toBe(question.type);
       });
@@ -157,7 +159,6 @@ describe("GET /api/questions/:id", () => {
     const { question } = await createQuestion(
       "What is the average weight of an elephant?"
     );
-    console.log(question.id);
 
     const app = await createServer();
 
