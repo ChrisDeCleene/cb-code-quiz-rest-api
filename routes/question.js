@@ -99,11 +99,6 @@ module.exports = (app) => {
    *          $ref: "#/definitions/Question"
    */
   router.post("/", async (req, res, next) => {
-    const { question, answers, topics, type } = req.body.question;
-    // Shouldn't mongoose do this?
-    // if (!question || !answers || !topics || !type) {
-    //   return res.sendStatus(400);
-    // }
     try {
       const questionResponse = new QuestionModel(req.body.question);
       const newQuestion = await questionResponse.save();

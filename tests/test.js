@@ -66,7 +66,6 @@ afterAll(async () => {
 describe("User Model", () => {
   test("should create a user with email, password, firstName, lastName, userType, createdAt and modifiedAt properties", async () => {
     const { user, userObject } = await createUser();
-    console.log("User Model Test", user);
     expect(user.email).toEqual(userObject.email);
     expect(user.password).toEqual(userObject.password);
     expect(user.firstName).toEqual(userObject.firstName);
@@ -79,7 +78,6 @@ describe("User Model", () => {
 describe("Question Model", () => {
   test("should create a question with question, answers, topics, and type", async () => {
     const { question, questionObject } = await createQuestion();
-    console.log("Question Model Test", question);
     expect(question._id).toBeTruthy();
     expect(question.question).toEqual(questionObject.question);
     expect(question.answers).toEqual(questionObject.answers);
@@ -104,7 +102,6 @@ describe("Score Model", () => {
 });
 
 describe("GET /api/questions", () => {
-  // Create three questions (SAVE THEM?)
   beforeAll(async () => {
     await dropAllCollections();
     await seedQuestionsCollection();
@@ -117,7 +114,6 @@ describe("GET /api/questions", () => {
       .then((response) => {
         const questions = response.body.questions;
         expect(questions.length).toEqual(3);
-        console.log(questions);
         expect(questions[0]).toHaveProperty("_id");
         expect(questions[0]).toHaveProperty("question");
         expect(questions[0]).toHaveProperty("answers");
@@ -199,7 +195,7 @@ describe("POST /api/questions", () => {
       .post("/questions")
       .send({ question: newQuestion })
       .then(async (response) => {
-        const question = await QuestionModel.findOne({});
+        const question = await QuestionModel.findOne();
         expect(response.body.question._id).toEqual(question.id);
         expect(question).toHaveProperty("_id");
         expect(question).toHaveProperty("question");
@@ -244,7 +240,7 @@ describe("POST /api/questions", () => {
     await supertest(app)
       .post("/questions")
       .send({ question: questionObject })
-      .then(async (response) => {
+      .then((response) => {
         const question = response.body.question;
         expect(question).toHaveProperty("_id");
         expect(question).toHaveProperty("question");
