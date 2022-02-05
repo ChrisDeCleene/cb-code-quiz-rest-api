@@ -111,17 +111,18 @@ describe("GET /api/questions", () => {
   });
   test("should return an array of all questions", async () => {
     const app = await createServer();
-    const questions = await QuestionModel.find({});
     await supertest(app)
       .get("/questions")
       .expect(200)
       .then((response) => {
-        console.log("RESPONSE", response.body);
-        expect(response.body.length).toEqual(3);
+        const questions = response.body.questions;
+        expect(questions.length).toEqual(3);
         console.log(questions);
-        expect(response.body[0]._id).toEqual(questions[0].id);
-        expect(response.body[1]._id).toEqual(questions[1].id);
-        expect(response.body[2]._id).toEqual(questions[2].id);
+        expect(questions[0]).toHaveProperty("_id");
+        expect(questions[0]).toHaveProperty("question");
+        expect(questions[0]).toHaveProperty("answers");
+        expect(questions[0]).toHaveProperty("topics");
+        expect(questions[0]).toHaveProperty("type");
       });
   });
   test("should return a status code of 200", async () => {
@@ -145,14 +146,14 @@ describe("GET /api/questions/:id", () => {
     await supertest(app)
       .get("/questions/" + question.id)
       .then((response) => {
-        console.log("RESPONSE", response.body, "QUESTION", question);
-        expect(response.body._id).toBe(question.id);
-        expect(response.body.question).toBe(question.question);
-        expect(response.body.answers[0][0]).toBe(question.answers[0][0]);
-        expect(response.body.answers[0][0] instanceof String).toBeTruthy;
-        expect(response.body.answers[0][1] instanceof Number).toBeTruthy;
-        expect(response.body.topics[0]).toBe(question.topics[0]);
-        expect(response.body.type).toBe(question.type);
+        const newQuestion = response.body.question;
+        expect(newQuestion._id).toBe(question.id);
+        expect(newQuestion.question).toBe(question.question);
+        expect(newQuestion.answers[0][0]).toBe(question.answers[0][0]);
+        expect(newQuestion.answers[0][0] instanceof String).toBeTruthy;
+        expect(newQuestion.answers[0][1] instanceof Number).toBeTruthy;
+        expect(newQuestion.topics[0]).toBe(question.topics[0]);
+        expect(newQuestion.type).toBe(question.type);
       });
   });
   test("should return a 200 status code for valid IDs", async () => {
@@ -174,5 +175,100 @@ describe("GET /api/questions/:id", () => {
     await supertest(app)
       .get("/questions/" + questionId)
       .expect(404);
+  });
+});
+
+describe("POST /api/questions", () => {
+  beforeAll(async () => {
+    await dropAllCollections();
+  });
+  test("should create a valid question", async () => {
+    const newQuestion = {
+      question: "Buddy the elf, what's your favorite color?",
+      answers: [
+        ["red", 0],
+        ["blue", 0],
+        ["brown, the color of the world's best cup of coffee", 1],
+        ["white", 0],
+      ],
+      topics: ["General"],
+      type: "multiple-choice",
+    };
+    const app = await createServer();
+    await supertest(app)
+      .post("/questions")
+      .send({ question: newQuestion })
+      .then(async (response) => {
+        const question = await QuestionModel.findOne({});
+        expect(response.body.question._id).toEqual(question.id);
+        expect(question).toHaveProperty("_id");
+        expect(question).toHaveProperty("question");
+        expect(question).toHaveProperty("answers");
+        expect(question).toHaveProperty("topics");
+        expect(question).toHaveProperty("type");
+      });
+  });
+  test("should return a 201 status code after question creation", async () => {
+    const newQuestion = {
+      question: "Buddy the elf, what's your favorite color?",
+      answers: [
+        ["red", 0],
+        ["blue", 0],
+        ["brown, the color of the world's best cup of coffee", 1],
+        ["white", 0],
+      ],
+      topics: ["General"],
+      type: "multiple-choice",
+    };
+
+    const app = await createServer();
+
+    await supertest(app)
+      .post("/questions")
+      .send({ question: newQuestion })
+      .expect(201);
+  });
+  test("should return he newly-created question after employee creation", async () => {
+    const questionObject = {
+      question: "Buddy the elf, what's your favorite color?",
+      answers: [
+        ["red", 0],
+        ["blue", 0],
+        ["brown, the color of the world's best cup of coffee", 1],
+        ["white", 0],
+      ],
+      topics: ["General"],
+      type: "multiple-choice",
+    };
+    const app = await createServer();
+    await supertest(app)
+      .post("/questions")
+      .send({ question: questionObject })
+      .then(async (response) => {
+        const question = response.body.question;
+        expect(question).toHaveProperty("_id");
+        expect(question).toHaveProperty("question");
+        expect(question).toHaveProperty("answers");
+        expect(question).toHaveProperty("topics");
+        expect(question).toHaveProperty("type");
+      });
+  });
+  test("should return a 400 status code for invalid question", async () => {
+    const newQuestion = {
+      question: "Buddy the elf, what's your favorite color?",
+      answers: [
+        ["red", 0],
+        ["blue", 0],
+        ["brown, the color of the world's best cup of coffee", 1],
+        ["white", 0],
+      ],
+    };
+
+    const app = await createServer();
+
+    await supertest(app)
+      .post("/questions")
+      .send({ question: newQuestion })
+      .expect(400);
   });
 });

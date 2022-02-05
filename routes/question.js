@@ -1,5 +1,4 @@
 const express = require("express");
-const question = require("../models/question");
 const QuestionModel = require("../models/question");
 const router = express.Router();
 
@@ -43,9 +42,8 @@ module.exports = (app) => {
    *          $ref: "#/definitions/Question"
    */
   router.get("/", async (req, res, next) => {
-    new question({ question: "Lorem Ipsum", answers: [] });
-    const questions = await QuestionModel.find({});
-    res.send(questions);
+    const questions = await QuestionModel.find();
+    res.send({ questions });
   });
 
   /**
@@ -74,7 +72,44 @@ module.exports = (app) => {
     if (!question) {
       return res.sendStatus(404);
     } else {
-      return res.send(question);
+      return res.send({ question });
+    }
+  });
+
+  /**
+   * @swagger
+   * /questions/:
+   *  post:
+   *    tags:
+   *      - Questions
+   *    description: Creates a new question
+   *    produces:
+   *      - application/json
+   *    parameters:
+   *      - name: question
+   *        description: Question object
+   *        in: body
+   *        required: true
+   *        schema:
+   *          $ref: '#/definitions/Question'
+   *    responses:
+   *      201:
+   *        description: Successfully created
+   *        schema:
+   *          $ref: "#/definitions/Question"
+   */
+  router.post("/", async (req, res, next) => {
+    const { question, answers, topics, type } = req.body.question;
+    // Shouldn't mongoose do this?
+    // if (!question || !answers || !topics || !type) {
+    //   return res.sendStatus(400);
+    // }
+    try {
+      const questionResponse = new QuestionModel(req.body.question);
+      const newQuestion = await questionResponse.save();
+      res.status(201).send({ question: newQuestion });
+    } catch (err) {
+      res.status(400).send(err);
     }
   });
 };
